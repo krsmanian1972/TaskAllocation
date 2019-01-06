@@ -1,0 +1,139 @@
+<html xmlns:concordion="http://www.concordion.org/2007/concordion">
+
+    <head>
+        <link href="../concordion.css" rel="stylesheet" type="text/css" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <title>Preferential Task Allocation</title>
+
+    <body>
+
+        <h1>Context</h1>
+		
+		<p>We are allowed to access a repository of tasks. </p>
+		<p>The task repository offers two functionalities. One is to request a task and the other is to give the task back to the repository.</p>
+       	<p>A task can be either in one of two states. An Assignable state or in Hold state. </p>
+       	
+       	<p>The task repository is an external service which is not under our control. </p>
+       	<p>The task repository DOES NOT provide an ability to fetch a task of our choice. </p>
+       	
+       	<h2>Objective</h2>
+       	
+       	<p>The requirement is that when a user requests for a task, we need to offer only those tasks which are in an Assignable state to the user. </p>
+      
+       	<div concordion:example="example">
+       	    <h2>Example</h2>
+       	    
+       	    <h3>Given</h3>
+       	    
+       	    <p>A set of tasks in different states:</p>
+       	    
+			<table concordion:execute="addTask(#id, #name, #orderNumber, #state, #assignedTo)">
+				<thead>
+					<tr>
+						<th concordion:set="#id">Task Id</th>
+						<th concordion:set="#name">Task Name</th>
+						<th concordion:set="#orderNumber">Order Number</th>
+						<th concordion:set="#state">State</th>
+						<th concordion:set="#assignedTo">Assigned To</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>1</td>
+						<td>Drilling</td>
+						<td>33AG</td>
+						<td>Assignable</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>Fastening</td>
+						<td>87BR</td>
+						<td>Assignable</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>3</td>
+						<td>Heavy Cutting</td>
+						<td>89XY</td>
+						<td>Hold</td>
+						<td>AX456</td>
+					</tr>
+					<tr>
+						<td>4</td>
+						<td>Milling</td>
+						<td>47AB</td>
+						<td>Assignable</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>5</td>
+						<td>Polishing</td>
+						<td>38AG</td>
+						<td>Hold</td>
+						<td>AM678</td>
+					</tr>
+					<tr>
+						<td>6</td>
+						<td>Gear Cutting</td>
+						<td>67ZC</td>
+						<td>Assignable</td>
+						<td></td>
+					</tr>						
+				</tbody>
+			</table>
+		
+			<h3>Expectation</h3>	
+			<p>Only the tasks in Assignable state should be offered to the requestor.</p>
+			<p>Obviously, tasks in Hold State should not be offered to the requestor.</p>
+			
+			<table>
+				<tr>
+					<th>requestor id</th>
+					<th>Task Id</th>
+					<th>Task Name</th>
+					<th>Order Number</th>
+					<th>State</th>
+					<th>Assigned To</th>
+				</tr>
+				<tr concordion:execute ="#task=allocate(#requestor)">
+					<td concordion:set="#requestor">AX123</td>
+					<td concordion:assertEquals="#task.id">1</td>
+					<td concordion:assertEquals="#task.name">Drilling</td>
+					<td concordion:assertEquals="#task.orderNumber">33AG</td>
+					<td concordion:assertEquals="#task.state">Assignable</td>
+					<td concordion:assertEquals="#task.assignedTo">AX123</td>
+				</tr>
+				<tr concordion:execute ="#task=allocate(#requestor)">
+					<td concordion:set="#requestor">AX124</td>
+					<td concordion:assertEquals="#task.id">2</td>
+					<td concordion:assertEquals="#task.name">Fastening</td>
+					<td concordion:assertEquals="#task.orderNumber">87BR</td>
+					<td concordion:assertEquals="#task.state">Assignable</td>
+					<td concordion:assertEquals="#task.assignedTo">AX124</td>
+				</tr>
+				<tr concordion:execute ="#task=allocate(#requestor)">
+					<td concordion:set="#requestor">AX124</td>
+					<td concordion:assertEquals="#task.id">4</td>
+					<td concordion:assertEquals="#task.name">Milling</td>
+					<td concordion:assertEquals="#task.orderNumber">47AB</td>
+					<td concordion:assertEquals="#task.state">Assignable</td>
+					<td concordion:assertEquals="#task.assignedTo">AX124</td>
+				</tr>
+				<tr concordion:execute ="#task=allocate(#requestor)">
+					<td concordion:set="#requestor">AX123</td>
+					<td concordion:assertEquals="#task.id">6</td>
+					<td concordion:assertEquals="#task.name">Gear Cutting</td>
+					<td concordion:assertEquals="#task.orderNumber">67ZC</td>
+					<td concordion:assertEquals="#task.state">Assignable</td>
+					<td concordion:assertEquals="#task.assignedTo">AX123</td>
+				</tr>
+				<tr concordion:execute ="#task=allocate(#requestor)">
+					<td concordion:set="#requestor">AX125</td>
+					<td concordion:assertEquals="#task">(null)</td>
+				</tr>						
+			</table>
+       	</div>
+    </body>
+</html>
