@@ -9,45 +9,42 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-/**
- * Should Buffer tasks that is assignable. Should Allocate tasks from the Buffer
- * 
- * @author raja
- *
- */
+import com.krscode.NoTaskException;
+import com.krscode.TaskRepository;
+
 public class AllocatorShould {
 
+	@Rule
+	public ExpectedException noTaskException = ExpectedException.none();
+
 	@Test
-	public void bufferAssignableTasks() {
+	public void bufferAssignableTasks() throws InterruptedException 
+	{
 		TaskRepository repository = RepositoryBuilder.buildTaskRepository();
 
 		Allocator allocator = new Allocator(repository);
-		allocator.setCapacity(4);
-		allocator.fillBuffer();
+
+		Thread.sleep(2000);
 
 		Collection<Task> tasks = allocator.getBufferedTasks();
-		assertEquals("Expecting three tasks in assignable state", 4, tasks.size());
+
+		assertTrue("Expecting three tasks in assignable state", tasks.size() == 2);
 		for (Task task : tasks) {
 			assertTrue("The task should be assignable", task.isAssignable());
 		}
 	}
 
-	@Rule
-	public ExpectedException noTaskException = ExpectedException.none();
-	
 	/**
 	 * Should allocate a performable task.
-	 * @throws InterruptedException 
-	 * @throws NoTaskException 
 	 */
 	@Test
-	public void allocateTaskFromBuffer() throws NoTaskException, InterruptedException {
+	public void allocateTaskFromBuffer() throws InterruptedException {
 
 		TaskRepository repository = RepositoryBuilder.buildTaskRepository();
 
 		Allocator allocator = new Allocator(repository);
 
-		String requestorId = "RJ72";
+		String requestorId = "RJ12";
 
 		Task task1 = allocator.allocate(requestorId);
 		assertEquals(requestorId, task1.getAssignedTo());
@@ -60,13 +57,15 @@ public class AllocatorShould {
 		Task task4 = allocator.allocate(requestorId);
 		assertEquals(requestorId, task4.getAssignedTo());
 		assertEquals(4, task4.getId());
-		
+
 		Task task6 = allocator.allocate(requestorId);
 		assertEquals(requestorId, task6.getAssignedTo());
 		assertEquals(6, task6.getId());
-		
+
 		noTaskException.expect(NoTaskException.class);
 		allocator.allocate(requestorId);
 	}
+
+	
 
 }
