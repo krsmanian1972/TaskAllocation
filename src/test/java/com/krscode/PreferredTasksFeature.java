@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 public class PreferredTasksFeature {
 
 	private final TaskRepository taskRepository = new StubbedTaskRepository();
-	private final Allocator allocator = new Allocator(taskRepository);
+	private final TaskProvider allocator = new TaskProvider(taskRepository);
 	
 	public void addTask(int id, String name, String orderNumber, String state, String assignedTo)
 	{

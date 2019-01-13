@@ -10,6 +10,8 @@ public final class TaskPool implements Runnable {
 	private final static String ALLOCATOR_ID = "9999";
 	private final static int UNVISITED_TASK_ID = -1;
 
+	private volatile boolean go = true;
+
 	public TaskPool(TaskRepository taskRepository, BlockingQueue<Task> allocationBuffer) {
 		this.taskRepository = taskRepository;
 		this.allocationBuffer = allocationBuffer;
@@ -27,14 +29,14 @@ public final class TaskPool implements Runnable {
 	private void fillBuffer() throws InterruptedException {
 		int visitedTaskId = UNVISITED_TASK_ID;
 
-		while (true) {
+		while (go) {
 			Task task = taskRepository.allocate(ALLOCATOR_ID);
 
 			if (task == null) {
 				Thread.sleep(1000);
 				continue;
 			}
-			
+
 			if (task.isAssignable()) {
 				allocationBuffer.put(task);
 			} else {
@@ -53,16 +55,16 @@ public final class TaskPool implements Runnable {
 			return visitedTaskId;
 		}
 
-		System.out.println("Sleeping due to revisit");
 		Thread.sleep(1000);
 		return UNVISITED_TASK_ID;
 	}
+	
 
 	public void run() {
 		try {
 			fillBuffer();
 		} catch (InterruptedException e) {
-
+			this.go = false;
 		}
 	}
 

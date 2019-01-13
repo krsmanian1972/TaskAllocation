@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class TaskProvider {
 	
@@ -29,7 +30,7 @@ public class TaskProvider {
 
 	public Task allocate(String requestorId) throws NoTaskException, InterruptedException {
 
-		Task capturedTask = allocationBuffer.take();
+		Task capturedTask = allocationBuffer.poll(2,TimeUnit.SECONDS);
 		if(capturedTask == null)
 		{
 			throw new NoTaskException("The Repository has no further tasks to offer");		
